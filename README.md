@@ -29,11 +29,15 @@ The company operates 77 fulfilment centers selling 51 meals across 14 categories
 
 ## Finding 1: Price Elasticity Varies Sharply by Category — and the Revenue Impact Is Real, Not Theoretical
 
+### 1.1 The Elasticity Spread
+
 Price elasticity measures how much demand moves when price moves. Concretely, in our data: Seafood has an elasticity of -3.84, meaning a 1% price increase corresponds to roughly a 3.84% drop in orders for that category — a coefficient near 0 means price barely matters, and a large negative number means demand is highly sensitive to price. We estimated this per meal×center pair (log-log slope of price vs. orders, using pairs with ≥10 distinct price points and ≥20 observations — 3,534 pairs qualified), then aggregated to category level.
 
 ![Category elasticity](assets/01_category_elasticity.png)
 
 96.9% of the 3,534 pairs showed the expected negative sign (price up → demand down), which is itself a sanity check that the estimates are behaviorally sensible rather than noise. Categories split clearly: Seafood and Pizza are highly elastic (below -3.5); Extras and Biryani are essentially price-insensitive (above -0.95). These four are used as the comparison set below because they sit at the two extremes and their revenue behavior can be directly contrasted.
+
+### 1.2 Revenue Validation
 
 **This isn't just a coefficient — we checked whether it actually shows up in revenue.** For four categories spanning the range, we plotted average revenue per row against discount depth:
 
@@ -43,6 +47,8 @@ Price elasticity measures how much demand moves when price moves. Concretely, in
 - **Pizza** (elasticity -3.82): $81k → $254k, same monotonic pattern.
 - **Extras** (elasticity -0.20): revenue *falls* from $61k to $22k as discount deepens — a 65% loss.
 - **Biryani** (elasticity -0.94, close to unit-elastic): revenue stays roughly flat ($14k → $15k) across all discount depths — which is exactly what textbook elasticity theory predicts happens near a coefficient of -1 (price and quantity changes roughly cancel out). This wasn't cherry-picked; it's a natural confirmation that the coefficient and the revenue curve agree.
+
+### 1.3 Ruling Out Confounds
 
 **What this rules out:** before trusting these elasticity numbers, we checked for two things that could have secretly been driving the pattern instead of the product itself — and instead of just asserting the check passed, here's what it actually looked like.
 
@@ -60,6 +66,8 @@ Panel A plots total weekly orders against week number across all 145 weeks — n
 
 Both checks came back clean, which is why we're confident the elasticity differences reflect real product-level behavior rather than a hidden confound.
 
+### 1.4 What This Means for Pricing
+
 **What this means for pricing:** discount depth should be set by category elasticity, not applied uniformly across the board.
 
 For Seafood and Pizza — both highly elastic at -3.84 and -3.82 respectively — a deep discount is a real revenue lever, not just a volume play: pushing from no discount to 30%+ roughly tripled average revenue per row in both categories ($36k→$123k for Seafood, $81k→$254k for Pizza). The order volume increase is large enough to outweigh the lower price per order.
@@ -74,11 +82,15 @@ The practical takeaway: before setting a discount depth for any category, check 
 
 ## Finding 2: Promotion Channels Show Diminishing Returns When Stacked
 
+### 2.1 Promotion Lift by Channel
+
 Emailer and homepage promotion are frequently bundled with discounts, which makes their effect hard to isolate — so we controlled for this by only looking at rows with ≤5% discount, where price is roughly held constant.
 
 ![Promo combo lift](assets/03_promo_combo_lift.png)
 
 With price effectively controlled: homepage alone delivers 2.22x lift, emailer alone delivers 1.71x, and using both together delivers 2.66x — clearly positive, but **not** the 3.80x you'd get if the two channels' effects were independent and multiplicative.
+
+### 2.2 Diminishing Returns When Stacked
 
 ![Diminishing returns](assets/04_promo_diminishing_returns.png)
 
@@ -94,11 +106,15 @@ The combined effect falls 30% short of what independence would predict. The two 
 
 Finding 1 established that categories differ sharply in price elasticity. Finding 2 established that promotion channels lift orders independent of price. That raises an obvious question before treating pricing and promotion as two separate levers in the Recommendations section: **are they actually separate, or is "promotion-responsive" just another name for "price-sensitive"?** If a category's promo lift could be predicted from its elasticity, we wouldn't need to analyze the two things separately — one number would tell you both. So we checked directly, without assuming the answer either way going in.
 
+### 3.1 How Promotion Lift Is Measured
+
 **How "promotion lift" is calculated:** same price-controlled approach as Finding 2 — we restrict to rows with ≤5% discount so price is held roughly flat, which isolates the promotion channel's own effect from the separate effect of discounting (the two are normally bundled together, as Finding 2 showed). The metric here is **order count, not revenue** — promotion doesn't change price, it changes how many people show up to order, so order volume is the direct thing to measure; mixing in revenue would blend the promotion effect together with any price effect, which is exactly what this control is meant to avoid.
 
 The chart below is a **worked example with 2 categories only**, showing the calculation step by step (bar height → the divide arrow → the resulting multiplier). The full result across all 14 categories is in the scatter plot further down.
 
 ![How promotion lift is calculated](assets/14_promolift_calc_example.png)
+
+### 3.2 Elasticity vs. Promo Lift Across Categories
 
 For each category: split the price-controlled rows into promoted vs. non-promoted, take the average order count in each group, divide. Seafood barely moves (1.19x) despite being the most price-elastic category in the data; Beverages moves far more (2.63x) from a much more moderate elasticity. Repeating this same calculation across all 14 categories produces the 14 points below.
 
@@ -118,7 +134,9 @@ The correlation is 0.08 — no meaningful relationship. Seafood sits at the far 
 
 This finding follows one logical chain across four charts: **(1) is the category average even trustworthy → (2) for the categories where it isn't, why do the products inside disagree → (3) is the company's current pricing actually accounting for that disagreement → (4) how much does getting this wrong actually cost.** Each step below is answered by the chart directly under it.
 
-**Step 1 — is the category average trustworthy?** Before trusting a category-level elasticity number, we checked whether the individual products inside each category actually agree with each other.
+### 4.1 Is the Category Average Trustworthy?
+
+Before trusting a category-level elasticity number, we checked whether the individual products inside each category actually agree with each other.
 
 ![Within-category spread](assets/06_within_category_spread.png)
 
@@ -130,7 +148,9 @@ Most categories pass this check — the 3 products inside Seafood, Pizza, Extras
 
 For these two, a single category-level number would be actively misleading — so we dig into each separately below.
 
-**Step 2 — why do the products disagree?** Starting with Beverages, since it has enough products (12) to look for a pattern:
+### 4.2 Why Do the Products Disagree?
+
+Starting with Beverages, since it has enough products (12) to look for a pattern:
 
 ![Beverages price vs elasticity](assets/07_beverages_price_elasticity.png)
 
@@ -138,7 +158,9 @@ Elasticity correlates with price at -0.79 — a real, checkable cause. The three
 
 Rice Bowl only has 3 products, too few to find a pattern in — and indeed, price doesn't explain it there (the low-elasticity product and one high-elasticity product have nearly identical prices, and all three share the same cuisine). That gap is picked back up in Step 3.
 
-**Step 3 — does current pricing account for any of this?** This is the step that turns "products disagree" into an actual business problem: is the company already pricing around this divergence, or is it invisible to current policy?
+### 4.3 Does Current Pricing Account for This?
+
+This is the step that turns "products disagree" into an actual business problem: is the company already pricing around this divergence, or is it invisible to current policy?
 
 ![Beverages discount mismatch](assets/08_beverages_discount_mismatch.png)
 
@@ -148,7 +170,9 @@ For Beverages: no. The price-sensitive Continental tier currently receives a *sm
 
 For Rice Bowl: same backwards pattern, even without an explainable cause. Meal 1109 (the low-elasticity outlier) currently carries the deepest average discount of the three (11.0%, vs. 4.35% for the other two) — and its revenue falls 17% as that discount deepens ($135k→$112k), while the other two gain 2.8x from the same discount depth. **The point of showing this alongside Beverages: you don't need to know *why* a product behaves differently to see that it's being priced wrong** — the mismatch is verifiable either way, which is why "cause unknown" doesn't block "action known."
 
-**Step 4 — how much is this worth fixing?** For Beverages specifically (where we can actually estimate a range): the revenue difference between current discount allocation and a naive "match the best-observed bucket" allocation is on the order of several hundred million to low billions in this dataset's units — roughly 20-30% of category revenue. This is a rough, static extrapolation (assumes no diminishing returns at scale, no fulfilment capacity limits, and uses revenue not profit), not a forecast — it should be read only as "large enough to prioritize," not as a number for a business case. That's exactly why the A/B test proposal exists: to replace this static estimate with a real, causal answer.
+### 4.4 How Much Is This Worth Fixing?
+
+For Beverages specifically (where we can actually estimate a range): the revenue difference between current discount allocation and a naive "match the best-observed bucket" allocation is on the order of several hundred million to low billions in this dataset's units — roughly 20-30% of category revenue. This is a rough, static extrapolation (assumes no diminishing returns at scale, no fulfilment capacity limits, and uses revenue not profit), not a forecast — it should be read only as "large enough to prioritize," not as a number for a business case. That's exactly why the A/B test proposal exists: to replace this static estimate with a real, causal answer.
 
 **Putting the four steps together:** the category-average trustworthiness check (Step 1) isn't just a data-quality footnote — it's what determines whether Finding 1's category-level playbook can be applied as-is (12 of 14 categories) or needs to be overridden at the product level (Beverages, and likely Rice Bowl once more data attributes become available). Steps 2-4 show that this isn't a hypothetical distinction: it's already costing real revenue through a backwards discount policy, at a scale worth fixing before it's worth precisely quantifying.
 
