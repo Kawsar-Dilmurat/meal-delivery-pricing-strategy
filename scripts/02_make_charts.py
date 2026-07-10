@@ -394,6 +394,44 @@ def chart_14():
     plt.close()
 
 
+# ---------- 15: recommendation matrix ----------
+def chart_15():
+    import matplotlib.patches as patches
+    quadrants = [
+        {"xy": (0, 0.5), "color": "#E8F0E8", "title": "Discount deeply for volume",
+         "sub": "Price is the main lever;\npromotion adds little", "examples": "e.g. Seafood, Pizza"},
+        {"xy": (0.5, 0.5), "color": "#FFF3E0", "title": "Deep discount + promote",
+         "sub": "Both levers work — split\nBeverages/Rice Bowl by product", "examples": "e.g. Rice Bowl, Beverages*"},
+        {"xy": (0, 0), "color": "#F5F5F5", "title": "Leave alone",
+         "sub": "Neither lever moves\nthis category", "examples": "e.g. Biryani, Extras"},
+        {"xy": (0.5, 0), "color": "#E3EDF5", "title": "Promote without discounting",
+         "sub": "The traffic lever works,\nprice doesn't", "examples": "e.g. Sandwich, Salad"},
+    ]
+    fig, ax = plt.subplots(figsize=(10, 8))
+    for q in quadrants:
+        rect = patches.Rectangle(q["xy"], 0.5, 0.5, facecolor=q["color"], edgecolor="#888888", linewidth=1.5)
+        ax.add_patch(rect)
+        cx, cy = q["xy"][0] + 0.25, q["xy"][1] + 0.25
+        ax.text(cx, cy + 0.12, q["title"], ha="center", va="center", fontsize=13, fontweight="bold", color="#222222")
+        ax.text(cx, cy - 0.01, q["sub"], ha="center", va="center", fontsize=9.5, color="#444444")
+        ax.text(cx, cy - 0.14, q["examples"], ha="center", va="center", fontsize=9, style="italic", color="#666666")
+    ax.text(0.5, -0.06, "Price Sensitivity (Elasticity) →", ha="center", fontsize=11, fontweight="bold")
+    ax.text(0.25, -0.03, "Low", ha="center", fontsize=9, color="#666666")
+    ax.text(0.75, -0.03, "High", ha="center", fontsize=9, color="#666666")
+    ax.text(-0.08, 0.5, "Promotion Responsiveness →", ha="center", va="center", rotation=90, fontsize=11, fontweight="bold")
+    ax.text(-0.04, 0.25, "Low", ha="center", va="center", rotation=90, fontsize=9, color="#666666")
+    ax.text(-0.04, 0.75, "High", ha="center", va="center", rotation=90, fontsize=9, color="#666666")
+    ax.set_xlim(-0.15, 1.02)
+    ax.set_ylim(-0.12, 1.05)
+    ax.axis("off")
+    ax.set_title("Recommendation Matrix: Pricing & Promotion Strategy by Category\n"
+                 "*Beverages and Rice Bowl need product-level splits per Finding 4, not single-cell treatment",
+                 fontsize=12, fontweight="bold")
+    plt.tight_layout()
+    plt.savefig(OUT + "15_recommendation_matrix.png", dpi=150, bbox_inches="tight")
+    plt.close()
+
+
 if __name__ == "__main__":
     chart_01()
     chart_02()
@@ -409,4 +447,5 @@ if __name__ == "__main__":
     chart_12()
     chart_13()
     chart_14()
-    print(f"All 14 charts saved to {OUT}")
+    chart_15()
+    print(f"All 15 charts saved to {OUT}")

@@ -1,5 +1,15 @@
 # Meal-Delivery Pricing & Promotion Strategy
 
+> **For Recruiters — 30-Second Summary**
+> - **Role target:** Data Analyst · Business Analyst · Pricing Analyst · Commercial Analyst
+> - **Tools:** Python (pandas, numpy, matplotlib) · SQL · Tableau dashboard *(in progress)*
+> - **Business question:** Should this meal-delivery company apply the same discount and promotion strategy across all product categories — or does it need to differ by category?
+> - **What I found:** Price sensitivity varies ~19x across categories, promotion channels overlap rather than stack additively, price sensitivity and promo responsiveness are unrelated, and two categories are currently being discounted backwards relative to their own price sensitivity.
+> - **What I built:** A verified pricing/promotion playbook (every claim backed by a chart), a decision matrix for category-level strategy, and a proposed A/B test to validate the highest-value recommendation before rollout.
+> - **Full case study below** ↓ — or jump to [SQL queries](/sql), [data dictionary](data_dictionary.md), [methodology appendix](methodology_appendix.md).
+
+---
+
 **Data source:** Genpact meal-delivery demand dataset (real operational data from a meal-delivery company operating across multiple cities) — 456,548 weekly records, 145 weeks, 77 fulfilment centers, 51 meals across 14 categories and 4 cuisines.
 
 **What this is:** A pricing and promotion analysis built from real transaction-level data, verified end-to-end — every number in this report is traceable to a table or chart, every claim was checked against the full dataset before being written down, and every finding states plainly what it can and cannot prove.
@@ -64,7 +74,7 @@ Panel A shows elasticity barely moves across center type (TYPE_A/B/C: -2.41, -2.
 
 Panel A plots total weekly orders against week number across all 145 weeks — no upward or downward drift (correlation 0.11). Panel B does the same for average discount depth — also flat (correlation -0.12). Discounts weren't concentrated in any particular period, so the revenue pattern isn't an artifact of when discounts happened to be applied.
 
-Both checks came back clean, which is why we're confident the elasticity differences reflect real product-level behavior rather than a hidden confound.
+Both checks came back clean. That doesn't make the elasticity estimates causal — price wasn't randomly assigned, so factors we didn't test for could still be at play — but it does rule out the two most obvious alternative explanations (which centers sell the product, and when discounts happened to occur), which makes "the product itself" a more credible driver of the pattern than it would be without these checks.
 
 ### 1.4 What This Means for Pricing
 
@@ -110,7 +120,7 @@ Finding 1 established that categories differ sharply in price elasticity. Findin
 
 **How "promotion lift" is calculated:** same price-controlled approach as Finding 2 — we restrict to rows with ≤5% discount so price is held roughly flat, which isolates the promotion channel's own effect from the separate effect of discounting (the two are normally bundled together, as Finding 2 showed). The metric here is **order count, not revenue** — promotion doesn't change price, it changes how many people show up to order, so order volume is the direct thing to measure; mixing in revenue would blend the promotion effect together with any price effect, which is exactly what this control is meant to avoid.
 
-The chart below is a **worked example with 2 categories only**, showing the calculation step by step (bar height → the divide arrow → the resulting multiplier). The full result across all 14 categories is in the scatter plot further down.
+The chart below is a **worked example with 2 categories only**, showing the calculation step by step (bar height → the divide arrow → the resulting multiplier). These two aren't arbitrary picks — **Seafood is the single most price-elastic category in the entire dataset (-3.84), and Beverages is the single highest promo-lift category in the entire dataset (2.63x)**. Pairing the two axis-extremes together is the clearest way to show the mismatch: if price sensitivity predicted promo responsiveness, these two "record holders" should be the same category — they aren't. The full result across all 14 categories is in the scatter plot further down.
 
 ![How promotion lift is calculated](assets/14_promolift_calc_example.png)
 
@@ -180,10 +190,12 @@ For Beverages specifically (where we can actually estimate a range): the revenue
 
 ## Recommendations
 
+![Recommendation matrix](assets/15_recommendation_matrix.png)
+
 | | High price sensitivity | Low price sensitivity |
 |---|---|---|
 | **High promo responsiveness** | Deep discount + promote (e.g. Rice Bowl, Beverages*) | Promote without discounting — the traffic lever works, price doesn't |
-| **Low promo responsiveness** | Price is the main lever; promotion adds little (e.g. Seafood, Pizza) | Leave alone — neither lever moves this category (e.g. Biryani, Extras) |
+| **Low promo responsiveness** | Discount deeply for volume — price is the main lever, promotion adds little (e.g. Seafood, Pizza) | Leave alone — neither lever moves this category (e.g. Biryani, Extras) |
 
 *Beverages and Rice Bowl should be split at the product level per Finding 4, not treated as single category cells.
 
@@ -233,7 +245,8 @@ This section is a proposed methodology, explicitly not an executed experiment �
 ## Data & Methodology
 
 - **Source:** Genpact meal-delivery demand dataset (real company, anonymized), originally released for a demand-forecasting competition; repurposed here for pricing/promotion analysis.
-- **Tables used:** `train.csv` (456,548 rows), `meal_info.csv` (51 meals × category/cuisine), `fulfilment_center_info.csv` (77 centers × type/region/size).
-- **Tools:** Python (pandas, numpy, matplotlib).
-- **Elasticity method:** log-log OLS slope of `checkout_price` vs. `num_orders`, estimated per meal×center pair with ≥10 distinct price points and ≥20 observations (3,534 of 3,597 pairs qualified).
+- **Tables used:** `train.csv` (456,548 rows), `meal_info.csv` (51 meals × category/cuisine), `fulfilment_center_info.csv` (77 centers × type/region/size). Full field-by-field definitions: [`data_dictionary.md`](data_dictionary.md).
+- **Tools:** Python (pandas, numpy, matplotlib), SQL.
+- **Elasticity method:** log-log OLS slope of `checkout_price` vs. `num_orders`, estimated per meal×center pair with ≥10 distinct price points and ≥20 observations (3,534 of 3,597 pairs qualified). Full technical detail, including the A/B sample-size formula and a suggested robustness extension: [`methodology_appendix.md`](methodology_appendix.md).
+- **SQL:** every aggregation behind the charts above, written and tested against the raw tables: [`sql/analysis_queries.sql`](sql/analysis_queries.sql).
 - **All charts and tables in this report were generated directly from this dataset — no figures were estimated or invented.**
