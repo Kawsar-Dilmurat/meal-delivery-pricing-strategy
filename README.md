@@ -1,15 +1,5 @@
 # Meal-Delivery Pricing & Promotion Strategy
 
-> **For Recruiters — 30-Second Summary**
-> - **Role target:** Data Analyst · Business Analyst · Pricing Analyst · Commercial Analyst
-> - **Tools:** Python (pandas, numpy, matplotlib) · SQL · Tableau dashboard *(in progress)*
-> - **Business question:** Should this meal-delivery company apply the same discount and promotion strategy across all product categories — or does it need to differ by category?
-> - **What I found:** Price sensitivity varies ~19x across categories, promotion channels overlap rather than stack additively, price sensitivity and promo responsiveness are unrelated, and two categories are currently being discounted backwards relative to their own price sensitivity.
-> - **What I built:** A verified pricing/promotion playbook (every claim backed by a chart), a decision matrix for category-level strategy, and a proposed A/B test to validate the highest-value recommendation before rollout.
-> - **Full case study below** ↓ — or jump to [SQL queries](/sql), [data dictionary](data_dictionary.md), [methodology appendix](methodology_appendix.md).
-
----
-
 **Data source:** Genpact meal-delivery demand dataset (real operational data from a meal-delivery company operating across multiple cities) — 456,548 weekly records, 145 weeks, 77 fulfilment centers, 51 meals across 14 categories and 4 cuisines.
 
 **What this is:** A pricing and promotion analysis built from real transaction-level data, verified end-to-end — every number in this report is traceable to a table or chart, every claim was checked against the full dataset before being written down, and every finding states plainly what it can and cannot prove.
