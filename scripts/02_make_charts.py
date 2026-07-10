@@ -73,7 +73,7 @@ def chart_02():
         ax.set_title(f"{cat}\n(elasticity = {cat_elas[cat]:.2f})", fontsize=11, fontweight="bold")
         ax.set_xticks(range(len(BINS)))
         ax.set_xticklabels(BINS, rotation=45, ha="right", fontsize=8)
-        ax.set_ylabel("Avg Revenue per Row ($, thousands)" if cat == "Seafood" else "")
+        ax.set_ylabel("Avg Revenue per Meal-Center-Week (thousands, dataset units)" if cat == "Seafood" else "")
     fig.suptitle("Finding 1 (validated): Revenue vs Discount Depth by Category\n"
                   "High-elasticity categories gain revenue from deep discounts; low-elasticity categories lose it",
                   fontsize=13, fontweight="bold")
@@ -94,7 +94,7 @@ def chart_03():
     for bar, val in zip(bars, combo_sorted["mean_orders"]):
         ax.text(bar.get_x() + bar.get_width() / 2, val + 8, f"{val:.0f} orders\n({val/baseline:.2f}x)",
                  ha="center", fontsize=9, fontweight="bold")
-    ax.set_ylabel("Avg Weekly Orders per Row (price held ≈ constant, discount ≤5%)")
+    ax.set_ylabel("Avg Orders per Meal-Center-Week (price held ≈ constant, discount ≤5%)")
     ax.set_title("Finding 2: Promotion Channels Lift Orders\n"
                   "(price controlled — this isolates the promo effect from the discount effect)",
                   fontsize=12, fontweight="bold", loc="left")
@@ -200,7 +200,7 @@ def chart_07():
     xline = np.linspace(bev["avg_price"].min(), bev["avg_price"].max(), 50)
     ax.plot(xline, np.polyval(z, xline), "--", color="black", alpha=0.5, linewidth=1)
     corr = bev["elasticity"].corr(bev["avg_price"])
-    ax.set_xlabel("Average Checkout Price ($)")
+    ax.set_xlabel("Average Checkout Price (dataset units)")
     ax.set_ylabel("Elasticity (product-level)")
     ax.set_title(f"Beverages: Elasticity Splits by Price Tier\ncorrelation with price = {corr:.2f} — "
                   f"red = Continental (premium), blue = other cuisines", fontsize=12, fontweight="bold", loc="left")
@@ -237,7 +237,7 @@ def chart_09():
         ax.text(x, y + 8, f"{y:.0f}k", ha="center", fontsize=8, color=RED)
     for x, y in zip(BINS, rb_rev["low_elastic(1109)"] / 1000):
         ax.text(x, y - 18, f"{y:.0f}k", ha="center", fontsize=8, color=BLUE)
-    ax.set_ylabel("Avg Revenue per Row ($, thousands)")
+    ax.set_ylabel("Avg Revenue per Meal-Center-Week (thousands, dataset units)")
     ax.set_xlabel("Discount Depth")
     ax.set_title("Rice Bowl: Same Mispricing Pattern as Beverages\n"
                   "(cause unexplained by available fields — but the revenue effect is real)",
@@ -386,7 +386,7 @@ def chart_14():
         note = "most sensitive" if cat == "Seafood" else "mid"
         ax.set_title(f"{cat}\n(elasticity {elas[cat]}, {note})", fontsize=10, fontweight="bold")
         ax.set_ylim(0, max_h * 1.15)
-        ax.set_ylabel("Avg Orders per Row" if cat == "Seafood" else "")
+        ax.set_ylabel("Avg Orders per Meal-Center-Week" if cat == "Seafood" else "")
     fig.suptitle('How "Promotion Lift" Is Calculated: Avg Orders, Promoted ÷ Non-Promoted\n'
                   "(price held ≈ constant — discount ≤5% only)", fontsize=12, fontweight="bold")
     plt.tight_layout(rect=[0, 0, 1, 0.90])
