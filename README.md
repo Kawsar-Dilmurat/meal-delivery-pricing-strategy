@@ -187,7 +187,7 @@ For Beverages specifically (where we can actually estimate a range): the revenue
 | | High price sensitivity | Low price sensitivity |
 |---|---|---|
 | **High promo responsiveness** | Deep discount + promote (e.g. Rice Bowl, Beverages*) | Promote without discounting — the traffic lever works, price doesn't |
-| **Low promo responsiveness** | Discount deeply for volume — price is the main lever, promotion adds little (e.g. Seafood, Pizza) | Leave alone — neither lever moves this category (e.g. Biryani, Extras) |
+| **Low promo responsiveness** | Discount deeply for volume — price is the main lever, promotion adds little (e.g. Seafood, Pizza) | Leave alone — neither lever moves this category (e.g. Extras). Biryani lands here too, but for a different reason: it's near unit-elastic (discount is revenue-neutral, not revenue-negative like Extras) and has the weakest promo lift in the dataset — the "leave alone" call is the same, the mechanism isn't. |
 
 *Beverages and Rice Bowl should be split at the product level per Finding 4, not treated as single category cells.
 
