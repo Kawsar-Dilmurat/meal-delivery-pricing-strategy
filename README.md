@@ -2,7 +2,9 @@
 
 **Data source:** Genpact meal-delivery demand dataset (real operational data from a meal-delivery company operating across multiple cities) — 456,548 weekly records, 145 weeks, 77 fulfilment centers, 51 meals across 14 categories and 4 cuisines.
 
-**What this is:** A pricing and promotion analysis built from real transaction-level data, verified end-to-end — every number in this report is traceable to a table or chart, every claim was checked against the full dataset before being written down, and every finding states plainly what it can and cannot prove.
+**Tools:** Python (pandas, numpy, matplotlib), SQL, and a Tableau dashboard (in progress). Query-level detail: [`sql/`](sql/analysis_queries.sql) · [`data_dictionary.md`](data_dictionary.md) · [`methodology_appendix.md`](methodology_appendix.md).
+
+**What this is:** A pricing and promotion analysis built from real weekly meal-center-level operational data, verified end-to-end — every number in this report is traceable to a table or chart, every claim was checked against the full dataset before being written down, and every finding states plainly what it can and cannot prove.
 
 **What this is not:** A machine-learning demand-forecasting exercise (the dataset was originally released for that purpose). This report instead asks a business question: *how should this company price and promote its products differently across categories, and what would it take to prove that a change actually works?*
 
@@ -35,22 +37,22 @@ Price elasticity measures how much demand moves when price moves. Concretely, in
 
 ![Category elasticity](assets/01_category_elasticity.png)
 
-96.9% of the 3,534 pairs showed the expected negative sign (price up → demand down), which is itself a sanity check that the estimates are behaviorally sensible rather than noise. Categories split clearly: Seafood and Pizza are highly elastic (below -3.5); Extras and Biryani are essentially price-insensitive (above -0.95). These four are used as the comparison set below because they sit at the two extremes and their revenue behavior can be directly contrasted.
+96.9% of the 3,534 pairs showed the expected negative sign (price up → demand down), which is itself a sanity check that the estimates are behaviorally sensible rather than noise. Categories split clearly: Seafood and Pizza are highly elastic (below -3.5); Extras is highly price-insensitive (-0.20, near zero), while Biryani sits close to the unit-elastic boundary (-0.94). These four are used as the comparison set below because they sit at the two extremes and middle of the elasticity spectrum, letting their revenue behavior be directly contrasted.
 
 ### 1.2 Revenue Validation
 
-**This isn't just a coefficient — we checked whether it actually shows up in revenue.** For four categories spanning the range, we plotted average revenue per row against discount depth:
+**This isn't just a coefficient — we checked whether it actually shows up in revenue.** For four categories spanning the range, we plotted average revenue per meal-center-week against discount depth:
 
 ![Revenue by discount depth, 4 categories](assets/02_revenue_by_discount_4cats.png)
 
-- **Seafood** (elasticity -3.84): revenue rises from $36k (no discount) to $123k (30%+ discount) — a 3.4x increase.
-- **Pizza** (elasticity -3.82): $81k → $254k, same monotonic pattern.
-- **Extras** (elasticity -0.20): revenue *falls* from $61k to $22k as discount deepens — a 65% loss.
-- **Biryani** (elasticity -0.94, close to unit-elastic): revenue stays roughly flat ($14k → $15k) across all discount depths — which is exactly what textbook elasticity theory predicts happens near a coefficient of -1 (price and quantity changes roughly cancel out). This wasn't cherry-picked; it's a natural confirmation that the coefficient and the revenue curve agree.
+- **Seafood** (elasticity -3.84): revenue rises from 36k units (no discount) to 123k units (30%+ discount) — a 3.4x increase.
+- **Pizza** (elasticity -3.82): 81k units → 254k units, same monotonic pattern.
+- **Extras** (elasticity -0.20): revenue *falls* from 61k units to 22k units as discount deepens — a 65% loss.
+- **Biryani** (elasticity -0.94, close to unit-elastic): revenue stays roughly flat (14k units → 15k units) across all discount depths — which is exactly what textbook elasticity theory predicts happens near a coefficient of -1 (price and quantity changes roughly cancel out). This wasn't cherry-picked; it's a natural confirmation that the coefficient and the revenue curve agree.
 
-### 1.3 Ruling Out Confounds
+### 1.3 Checking Major Alternative Explanations
 
-**What this rules out:** before trusting these elasticity numbers, we checked for two things that could have secretly been driving the pattern instead of the product itself — and instead of just asserting the check passed, here's what it actually looked like.
+**What this checks:** before trusting these elasticity numbers, we tested for two things that could have secretly been driving the pattern instead of the product itself — and instead of just asserting the checks passed, here's what they actually looked like.
 
 *Could it just be which centers happen to sell each category?* If, say, Seafood happened to be sold mostly by unusually large or unusually cheap-to-run centers, that could explain its high elasticity instead of the product itself.
 
@@ -64,17 +66,17 @@ Panel A shows elasticity barely moves across center type (TYPE_A/B/C: -2.41, -2.
 
 Panel A plots total weekly orders against week number across all 145 weeks — no upward or downward drift (correlation 0.11). Panel B does the same for average discount depth — also flat (correlation -0.12). Discounts weren't concentrated in any particular period, so the revenue pattern isn't an artifact of when discounts happened to be applied.
 
-Both checks came back clean. That doesn't make the elasticity estimates causal — price wasn't randomly assigned, so factors we didn't test for could still be at play — but it does rule out the two most obvious alternative explanations (which centers sell the product, and when discounts happened to occur), which makes "the product itself" a more credible driver of the pattern than it would be without these checks.
+Both checks came back clean. That doesn't make the elasticity estimates causal — price wasn't randomly assigned, so factors we didn't test for could still be at play — but these checks do address the two most obvious alternative explanations (which centers sell the product, and when discounts happened to occur), which makes "the product itself" a more credible driver of the pattern than it would be without these checks, even though other unmeasured confounds can't be fully excluded.
 
 ### 1.4 What This Means for Pricing
 
 **What this means for pricing:** discount depth should be set by category elasticity, not applied uniformly across the board.
 
-For Seafood and Pizza — both highly elastic at -3.84 and -3.82 respectively — a deep discount is a real revenue lever, not just a volume play: pushing from no discount to 30%+ roughly tripled average revenue per row in both categories ($36k→$123k for Seafood, $81k→$254k for Pizza). The order volume increase is large enough to outweigh the lower price per order.
+For Seafood and Pizza — both highly elastic at -3.84 and -3.82 respectively — a deep discount is a real revenue lever, not just a volume play: pushing from no discount to 30%+ roughly tripled average revenue per meal-center-week in both categories (36k units→123k units for Seafood, 81k units→254k units for Pizza). The order volume increase is large enough to outweigh the lower price per order.
 
-For Extras (elasticity -0.20, barely price-sensitive at all), the opposite is true: the exact same 30%+ discount depth cut average revenue per row by nearly two-thirds ($61k→$22k). Orders barely moved, so all that happened was the price got cut with almost nothing gained in return. Biryani (elasticity -0.94, close to unit-elastic at -1) sits in between, and its revenue stayed roughly flat regardless of discount depth ($14k-$15k across all bins) — for a category like this, discounting is close to a wash: it doesn't clearly help or hurt, so it's not a lever worth spending promotional effort on.
+For Extras (elasticity -0.20, barely price-sensitive at all), the opposite is true: the exact same 30%+ discount depth cut average revenue per meal-center-week by nearly two-thirds (61k units→22k units). Orders barely moved, so all that happened was the price got cut with almost nothing gained in return. Biryani (elasticity -0.94, close to unit-elastic at -1) sits in between, and its revenue stayed roughly flat regardless of discount depth (14k units-15k units across all bins) — for a category like this, discounting is close to a wash: it doesn't clearly help or hurt, so it's not a lever worth spending promotional effort on.
 
-To be clear about what's actually doing the explanatory work here: Seafood, Pizza, Extras, and Biryani aren't special in themselves — they're simply four categories that happen to sit at the extremes and middle of the elasticity spectrum from Chart 1. The pattern being demonstrated is that elasticity predicts the revenue outcome, not that these four products have some unique property. Any other category could be swapped in at a similar elasticity level and the same relationship should hold.
+To be clear about what's actually doing the explanatory work here: Seafood, Pizza, Extras, and Biryani aren't special in themselves — they're simply four categories that happen to sit at the extremes and middle of the elasticity spectrum from Chart 1. The pattern being demonstrated is that the observed revenue curves align with what the elasticity estimates would predict, not that these four products have some unique property. Any other category could be swapped in at a similar elasticity level and the same relationship should hold.
 
 The practical takeaway: before setting a discount depth for any category, check which side of this line it falls on. Categories like Seafood/Pizza reward aggressive discounting; categories like Extras are actively harmed by it; and unit-elastic categories like Biryani are largely indifferent, so effort is better spent elsewhere.
 
@@ -154,7 +156,7 @@ Starting with Beverages, since it has enough products (12) to look for a pattern
 
 ![Beverages price vs elasticity](assets/07_beverages_price_elasticity.png)
 
-Elasticity correlates with price at -0.79 — a real, checkable cause. The three most elastic beverages are all Continental-cuisine, averaging $348 — a premium tier with close, cheaper substitutes nearby (Thai/Italian beverages at $125-210, mostly inelastic). Premium/discretionary items are easier to substitute away from when price rises, which is a coherent economic story, not just a coincidence. (One product, meal 2139 at $309, doesn't fit and is reported as an honest exception.)
+Elasticity correlates with price at -0.79 — a real, checkable cause. The three most elastic beverages are all Continental-cuisine, averaging 348 units — a premium tier with close, cheaper substitutes nearby (Thai/Italian beverages at 125-210 units, mostly inelastic). Premium/discretionary items are easier to substitute away from when price rises, which is a coherent economic story, not just a coincidence. (One product, meal 2139 at 309 units, doesn't fit and is reported as an honest exception.)
 
 Rice Bowl only has 3 products, too few to find a pattern in — and indeed, price doesn't explain it there (the low-elasticity product and one high-elasticity product have nearly identical prices, and all three share the same cuisine). That gap is picked back up in Step 3.
 
@@ -168,7 +170,7 @@ For Beverages: no. The price-sensitive Continental tier currently receives a *sm
 
 ![Rice Bowl revenue by discount](assets/09_ricebowl_revenue.png)
 
-For Rice Bowl: same backwards pattern, even without an explainable cause. Meal 1109 (the low-elasticity outlier) currently carries the deepest average discount of the three (11.0%, vs. 4.35% for the other two) — and its revenue falls 17% as that discount deepens ($135k→$112k), while the other two gain 2.8x from the same discount depth. **The point of showing this alongside Beverages: you don't need to know *why* a product behaves differently to see that it's being priced wrong** — the mismatch is verifiable either way, which is why "cause unknown" doesn't block "action known."
+For Rice Bowl: same backwards pattern, even without an explainable cause. Meal 1109 (the low-elasticity outlier) currently carries the deepest average discount of the three (11.0%, vs. 4.35% for the other two). Its revenue is not simply low throughout — it actually rises through the light-to-moderate discount range (135k→180k units) — but at the 30%+ bucket it drops sharply to 112k units, about 17% *below* the no-discount level, while the two high-elastic products keep climbing to 2.8x their no-discount revenue over the same range. **The point of showing this alongside Beverages: you don't need to know *why* a product behaves differently to see that its deepest discount tier is currently destroying value** — the mismatch is verifiable either way, which is why "cause unknown" doesn't block "action known."
 
 ### 4.4 How Much Is This Worth Fixing?
 
@@ -190,7 +192,7 @@ For Beverages specifically (where we can actually estimate a range): the revenue
 *Beverages and Rice Bowl should be split at the product level per Finding 4, not treated as single category cells.
 
 Specific, provable actions:
-1. **Reduce Extras/Biryani discount depth** — Finding 1 shows discounting these categories loses revenue, not gains it.
+1. **Reduce Extras discount depth** — Finding 1 shows discounting this category loses revenue, not gains it. **Deprioritize discount spend on Biryani** — its revenue is roughly flat-to-slightly-positive across discount depths (near unit-elastic), so deep discounts neither clearly help nor clearly hurt; the budget is better spent on categories where the direction is unambiguous.
 2. **Reallocate promo budget toward homepage over emailer** when a choice must be made — Finding 2 shows it's the stronger single channel; don't assume stacking both scales linearly.
 3. **Swap the Beverages discount allocation** — shift discount weight from the low-elastic tier onto the Continental (high-elastic) tier. Provable direction; exact magnitude needs the test below.
 4. **Flag Rice Bowl meal 1109 for review** — it's being discounted the most while responding the least; the cause is unknown but the mispricing is not.
@@ -208,7 +210,7 @@ Static analysis above shows *correlation* between discount depth and revenue out
 - **Treatment:** Continental beverages discounted to 20-25% (currently ~4.5%); the 9 low-elastic beverages moved to 0% discount (currently ~2.5-16%).
 - **Control:** current pricing continues unchanged.
 - **Primary metric:** total Beverages revenue per center per week.
-- **Sample size:** we pulled the real weekly per-center Beverages revenue from this dataset and measured its variance directly — it's noisier than a first guess would suggest (coefficient of variation = 58.9%, i.e. weekly revenue per center swings by more than half its own mean). At that variance, detecting a 15% revenue change in a single week of data would need ~242 centers per arm — more than three times the entire fleet of 77. Averaging revenue over multiple weeks reduces this noise (variance shrinks roughly with the square root of test duration), which is why test duration matters as much as center count here:
+- **Sample size:** we pulled the real weekly per-center Beverages revenue from this dataset and measured its variance directly — it's noisier than a first guess would suggest (coefficient of variation = 58.9%, i.e. weekly revenue per center swings by more than half its own mean). At that variance, detecting a 15% revenue change in a single week of data would need ~242 centers per arm — more than three times the entire fleet of 77. Averaging revenue over multiple weeks reduces this noise — the standard error of the average shrinks with the square root of test duration — which is why test duration matters as much as center count here:
 
 ![A/B test feasibility](assets/12_ab_sample_size.png)
 

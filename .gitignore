@@ -1,0 +1,10 @@
+# Raw and processed data are excluded — see README "Reproducing this analysis"
+# (these folders don't need to exist until you run the scripts locally)
+data/raw/*.csv
+data/processed/*.csv
+
+# OS / editor cruft
+.DS_Store
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
