@@ -403,7 +403,7 @@ def chart_15():
         {"xy": (0.5, 0.5), "color": "#FFF3E0", "title": "Deep discount + promote",
          "sub": "Both levers work — split\nBeverages/Rice Bowl by product", "examples": "e.g. Rice Bowl, Beverages*"},
         {"xy": (0, 0), "color": "#F5F5F5", "title": "Leave alone",
-         "sub": "Neither lever moves\nthis category", "examples": "e.g. Biryani, Extras"},
+         "sub": "Neither lever moves\nthis category", "examples": "e.g. Extras"},
         {"xy": (0.5, 0), "color": "#E3EDF5", "title": "Promote without discounting",
          "sub": "The traffic lever works,\nprice doesn't", "examples": "e.g. Sandwich, Salad"},
     ]
